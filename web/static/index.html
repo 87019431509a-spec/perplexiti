@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro Comment Bot - Premium Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ═══════════════════════════════════════════════════════════════════
+             SIDEBAR
+             ═══════════════════════════════════════════════════════════════════ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">🤖</div>
+                    <div class="logo-text">
+                        <span class="logo-title">NEURO COMMENT</span>
+                        <span class="logo-subtitle">Premium Edition</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <div class="nav-section-title">Главное</div>
+                    <div class="nav-item active" data-page="dashboard">
+                        <span class="nav-item-icon">📊</span>
+                        <span class="nav-item-text">Дашборд</span>
+                    </div>
+                    <div class="nav-item" data-page="logs">
+                        <span class="nav-item-icon">📜</span>
+                        <span class="nav-item-text">Логи</span>
+                        <span class="nav-item-badge" id="logs-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Управление</div>
+                    <div class="nav-item" data-page="accounts">
+                        <span class="nav-item-icon">📱</span>
+                        <span class="nav-item-text">Аккаунты</span>
+                    </div>
+                    <div class="nav-item" data-page="channels">
+                        <span class="nav-item-icon">📢</span>
+                        <span class="nav-item-text">Каналы</span>
+                    </div>
+                    <div class="nav-item" data-page="proxies">
+                        <span class="nav-item-icon">🌐</span>
+                        <span class="nav-item-text">Прокси</span>
+                    </div>
+                    <div class="nav-item" data-page="comments">
+                        <span class="nav-item-icon">💬</span>
+                        <span class="nav-item-text">Комментарии</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Система</div>
+                    <div class="nav-item" data-page="settings">
+                        <span class="nav-item-icon">⚙️</span>
+                        <span class="nav-item-text">Настройки</span>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="mode-indicator">
+                <div class="mode-label">Режим работы</div>
+                <div class="mode-value safe" id="current-mode">
+                    <span>🛡️</span>
+                    <span id="mode-text">SAFE</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             MAIN CONTENT
+             ═══════════════════════════════════════════════════════════════════ -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div class="page" id="page-dashboard">
+                <div class="page-header">
+                    <h1 class="page-title">Дашборд <span>/ обзор системы</span></h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="refreshData()">
+                            🔄 Обновить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📨</div>
+                        <div class="stat-value" id="stat-sent">0</div>
+                        <div class="stat-label">Отправлено сегодня</div>
+                        <div class="stat-change positive" id="stat-sent-change">+0</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="stat-success">0</div>
+                        <div class="stat-label">Успешных</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-icon">🗑️</div>
+                        <div class="stat-value" id="stat-deleted">0</div>
+                        <div class="stat-label">Удалено</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="stat-warmup">0</div>
+                        <div class="stat-label">Действий прогрева</div>
+                    </div>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="service-grid">
+                    <!-- Commenting Service -->
+                    <div class="service-card" id="service-commenting">
+                        <div class="service-header">
+                            <div class="service-info">
+                                <div class="service-icon commenting">💬</div>
+                                <div>
+                                    <div class="service-name">Комментирование</div>
+                                    <div class="service-status">
+                                        <span class="status-dot stopped" id="commenting-dot"></span>
+                                        <span id="commenting-status">Остановлено</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="service-uptime" id="commenting-uptime"></div>
+                        </div>
+                        <div class="service-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="commenting-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="service-actions">
+                            <button class="btn btn-success" id="btn-commenting-start" onclick="startCommenting()">
+                                ▶️ Запустить
+                            </button>
+                            <button class="btn btn-danger" id="btn-commenting-stop" onclick="stopCommenting()" disabled>
+                                ⏹️ Остановить
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Warmup Service -->
+                    <div class="service-card" id="service-warmup">
+                        <div class="service-header">
+                            <div class="service-info">
+                                <div class="service-icon warmup">🔥</div>
+                                <div>
+                                    <div class="service-name">Прогрев</div>
+                                    <div class="service-status">
+                                        <span class="status-dot stopped" id="warmup-dot"></span>
+                                        <span id="warmup-status">Остановлено</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="service-uptime" id="warmup-uptime"></div>
+                        </div>
+                        <div class="service-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill success" id="warmup-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="service-actions">
+                            <button class="btn btn-success" id="btn-warmup-start" onclick="startWarmup()">
+                                ▶️ Запустить
+                            </button>
+                            <button class="btn btn-danger" id="btn-warmup-stop" onclick="stopWarmup()" disabled>
+                                ⏹️ Остановить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">📈</span>
+                            Активность за 24 часа
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Logs -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">📜</span>
+                            Последние события
+                        </div>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="logs-container" id="dashboard-logs" style="height: 250px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Page -->
+            <div class="page" id="page-logs" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Логи <span>/ все события</span></h1>
+                    <div class="header-actions">
+                        <select class="form-input" style="width: auto;" id="log-filter">
+                            <option value="all">Все</option>
+                            <option value="commenting">Комментирование</option>
+                            <option value="warmup">Прогрев</option>
+                            <option value="monitor">Мониторинг</option>
+                            <option value="system">Система</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="clearLogs()">
+                            🗑️ Очистить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">📜</span>
+                            Журнал событий
+                        </div>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="logs-container" id="full-logs" style="height: 600px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accounts Page -->
+            <div class="page" id="page-accounts" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Аккаунты <span>/ управление</span></h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="loadAccounts()">
+                            🔄 Обновить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-icon">📱</div>
+                        <div class="stat-value" id="acc-sessions-comments">0</div>
+                        <div class="stat-label">Sessions (комменты)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-value" id="acc-tdata-comments">0</div>
+                        <div class="stat-label">TData (комменты)</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="acc-sessions-warmup">0</div>
+                        <div class="stat-label">Sessions (прогрев)</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-value" id="acc-tdata-warmup">0</div>
+                        <div class="stat-label">TData (прогрев)</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">📱</span>
+                            Список аккаунтов
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Телефон</th>
+                                        <th>Тип</th>
+                                        <th>Статус</th>
+                                        <th>Прогрев</th>
+                                        <th>Сегодня</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accounts-table">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">Загрузка...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Channels Page -->
+            <div class="page" id="page-channels" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Каналы <span>/ управление</span></h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="loadChannels()">
+                            🔄 Обновить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-icon">📢</div>
+                        <div class="stat-value" id="ch-comments">0</div>
+                        <div class="stat-label">Каналы (комменты)</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="ch-active">0</div>
+                        <div class="stat-label">Активных</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon">😴</div>
+                        <div class="stat-value" id="ch-sleep">0</div>
+                        <div class="stat-label">В спячке</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-icon">⛔</div>
+                        <div class="stat-value" id="ch-disabled">0</div>
+                        <div class="stat-label">Отключено</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">📢</span>
+                            Список каналов
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Канал</th>
+                                        <th>Статус</th>
+                                        <th>Комментариев</th>
+                                        <th>Удалений</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="channels-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Загрузка...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proxies Page -->
+            <div class="page" id="page-proxies" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Прокси <span>/ управление</span></h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="checkProxies('comments')">
+                            🔍 Проверить (комменты)
+                        </button>
+                        <button class="btn btn-primary" onclick="checkProxies('warmup')">
+                            🔍 Проверить (прогрев)
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-icon">🌐</div>
+                        <div class="stat-value" id="proxy-comments-total">0</div>
+                        <div class="stat-label">Прокси (комменты)</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="proxy-comments-ok">0</div>
+                        <div class="stat-label">Работают</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="proxy-warmup-total">0</div>
+                        <div class="stat-label">Прокси (прогрев)</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="proxy-warmup-ok">0</div>
+                        <div class="stat-label">Работают</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">🌐</span>
+                            Результаты проверки
+                        </div>
+                    </div>
+                    <div class="card-body" id="proxy-results">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <div class="empty-state-title">Нажмите "Проверить" для тестирования прокси</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Page -->
+            <div class="page" id="page-comments" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Комментарии <span>/ история</span></h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="loadComments()">
+                            🔄 Обновить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-title-icon">💬</span>
+                            Последние комментарии
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Время</th>
+                                        <th>Канал</th>
+                                        <th>Комментарий</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="comments-table">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Загрузка...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="page-settings" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Настройки <span>/ конфигурация</span></h1>
+                    <div class="header-actions">
+                        <button class="btn btn-success" onclick="saveSettings()">
+                            💾 Сохранить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-grid">
+                    <!-- Mode -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🛡️ Режим работы
+                        </div>
+                        <div class="mode-switch">
+                            <div class="mode-option" id="mode-normal" onclick="setMode('NORMAL')">
+                                ⚡ NORMAL
+                            </div>
+                            <div class="mode-option active safe" id="mode-safe" onclick="setMode('SAFE')">
+                                🛡️ SAFE
+                            </div>
+                        </div>
+                        <p class="text-muted mt-4" style="font-size: 13px;">
+                            SAFE режим: удвоенные задержки, половинные лимиты
+                        </p>
+                    </div>
+
+                    <!-- Delays -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            ⏱️ Задержки
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Между действиями (сек)</label>
+                            <div class="flex gap-3">
+                                <input type="number" class="form-input" id="delay-min" value="30" min="10" max="300">
+                                <span class="text-muted" style="align-self: center;">—</span>
+                                <input type="number" class="form-input" id="delay-max" value="90" min="10" max="600">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Чтение поста (сек)</label>
+                            <div class="flex gap-3">
+                                <input type="number" class="form-input" id="read-min" value="5" min="1" max="60">
+                                <span class="text-muted" style="align-self: center;">—</span>
+                                <input type="number" class="form-input" id="read-max" value="15" min="1" max="120">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Limits -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            📊 Лимиты
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Комментариев в час</label>
+                            <input type="number" class="form-input" id="limit-hour" value="10" min="1" max="100">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Комментариев в день</label>
+                            <input type="number" class="form-input" id="limit-day" value="50" min="1" max="500">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Вероятность комментирования: <span id="probability-value">75</span>%</label>
+                            <div class="range-container">
+                                <input type="range" class="range-slider" id="probability" value="75" min="0" max="100" 
+                                       oninput="document.getElementById('probability-value').textContent = this.value">
+                            </div>
+                            <div class="range-labels">
+                                <span>0%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GPT -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🤖 GPT Настройки
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Модель</label>
+                            <select class="form-input" id="gpt-model">
+                                <option value="gpt-4o-mini">gpt-4o-mini</option>
+                                <option value="gpt-4o">gpt-4o</option>
+                                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Temperature: <span id="temp-value">0.9</span></label>
+                            <div class="range-container">
+                                <input type="range" class="range-slider" id="gpt-temp" value="90" min="0" max="100" 
+                                       oninput="document.getElementById('temp-value').textContent = (this.value/100).toFixed(1)">
+                            </div>
+                            <div class="range-labels">
+                                <span>0.0</span>
+                                <span>1.0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">API Key</label>
+                            <input type="password" class="form-input" id="gpt-key" placeholder="sk-...">
+                        </div>
+                    </div>
+
+                    <!-- Monitor -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            👁️ Мониторинг
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Интервал проверки (сек)</label>
+                            <input type="number" class="form-input" id="monitor-interval" value="60" min="30" max="600">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Спячка после удалений</label>
+                            <input type="number" class="form-input" id="sanctions-sleep" value="1" min="1" max="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Отключение после удалений</label>
+                            <input type="number" class="form-input" id="sanctions-disable" value="3" min="1" max="20">
+                        </div>
+                    </div>
+
+                    <!-- Prompt -->
+                    <div class="settings-section" style="grid-column: span 2;">
+                        <div class="settings-section-title">
+                            ✏️ Промпт персонажа
+                        </div>
+                        
+                        <div class="form-group">
+                            <textarea class="form-input form-textarea" id="gpt-prompt" rows="8" placeholder="Опишите персонажа...">Ты — девушка-анимешница, милая и живая. Любишь музыку и аниме.
+Пишешь короткие комментарии 3-5 слов, иногда до 10.
+Иногда делаешь небольшие грамматические ошибки для естественности.
+Используешь смайлики и сленг.
+
+СТРОГО ЗАПРЕЩЕНО: политика, война, геополитика, конфликты.
+Если пост про войну/смерть/политику — верни ТОЛЬКО грустный смайл (😢 или 🖤).
+Если пост неинтересный или не понимаешь — верни SKIP.</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notifications -->
+    <div class="notifications" id="notifications"></div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

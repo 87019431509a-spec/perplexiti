@@ -1,0 +1,4 @@
+# Прокси для комментирования
+# Формат: type://user:pass@host:port
+# socks5://user:pass@127.0.0.1:1080
+# http://user:pass@127.0.0.1:8080

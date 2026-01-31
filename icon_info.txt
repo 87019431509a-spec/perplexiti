@@ -1,0 +1,25 @@
+ИКОНКА ДЛЯ .EXE ФАЙЛА
+=====================
+
+Чтобы добавить красивую иконку к .exe файлу:
+
+1. Создайте или скачайте иконку в формате .ico (256x256 пикселей)
+
+2. Сохраните её как "icon.ico" в папке project/
+
+3. Запустите сборку: python build_exe.py
+
+4. Иконка автоматически добавится к NeuroCommentBot.exe
+
+
+Бесплатные иконки можно найти на:
+- https://icon-icons.com
+- https://www.flaticon.com
+- https://icons8.com
+
+Ищите: "robot", "bot", "telegram", "comment", "chat"
+
+
+Конвертировать PNG в ICO можно на:
+- https://convertico.com
+- https://icoconvert.com
